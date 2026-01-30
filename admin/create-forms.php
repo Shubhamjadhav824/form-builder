@@ -29,11 +29,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <html>
 <head>
     <title>Create Form</title>
-    <style>
-        body { font-family: Arial; padding: 20px; }
-        .field { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-    </style>
+    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
+
 <body>
 
 <h2>Create New Form</h2>

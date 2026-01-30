@@ -1,14 +1,5 @@
 <?php
 session_start();
-if (!isset($_SESSION['admin'])) {
-    header("Location: login.php");
-    exit;
-}
-?>
-
-
-<?php
-session_start();
 
 if ($_POST) {
     if ($_POST['username'] === 'admin' && $_POST['password'] === 'admin123') {
@@ -20,10 +11,23 @@ if ($_POST) {
 }
 ?>
 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
 <form method="POST">
     <h2>Admin Login</h2>
-    <?= $error ?? "" ?><br>
+
+    <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
+
     <input name="username" placeholder="Username" required>
     <input type="password" name="password" placeholder="Password" required>
-    <button>Login</button>
+    <button type="submit">Login</button>
 </form>
+
+</body>
+</html>

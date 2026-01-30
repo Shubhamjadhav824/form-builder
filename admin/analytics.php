@@ -4,54 +4,76 @@ if (!isset($_SESSION['admin'])) {
     header("Location: login.php");
     exit;
 }
-?>
 
-
-<?php
 require_once "../configuration/db.php";
 
-$form_id = $_GET['form_id'];
+$form_id = $_GET['form_id'] ?? 0;
 
-$form = $conn->query("SELECT structure_json FROM forms WHERE id=$form_id")->fetch_assoc();
+/* Fetch form structure */
+$formStmt = $conn->prepare(
+    "SELECT structure_json FROM forms WHERE id = ?"
+);
+$formStmt->bind_param("i", $form_id);
+$formStmt->execute();
+$form = $formStmt->get_result()->fetch_assoc();
 $fields = json_decode($form['structure_json'], true);
 
-$subs = $conn->query("SELECT response_json FROM form_submissions WHERE form_id=$form_id");
+/* Fetch submissions */
+$subStmt = $conn->prepare(
+    "SELECT response_json FROM form_submissions WHERE form_id = ?"
+);
+$subStmt->bind_param("i", $form_id);
+$subStmt->execute();
+$subs = $subStmt->get_result();
 
-$counts = [];
+$analytics = [];
+$totalSubmissions = $subs->num_rows;
 
-foreach ($fields as $i => $field) {
-    if (in_array($field['type'], ['dropdown', 'checkbox'])) {
-        $options = explode(",", $field['options']);
-        foreach ($options as $opt) {
-            $counts[$i][trim($opt)] = 0;
+/* Initialize dropdown counters */
+foreach ($fields as $field) {
+    if ($field['type'] === 'dropdown') {
+        foreach ($field['options'] as $opt) {
+            $analytics[$field['label']][$opt] = 0;
         }
     }
 }
 
+/* Count responses */
 while ($row = $subs->fetch_assoc()) {
-    $responses = json_decode($row['response_json'], true);
-    foreach ($responses as $i => $value) {
-        if (is_array($value)) {
-            foreach ($value as $v) $counts[$i][$v]++;
-        } else {
-            $counts[$i][$value]++;
+    $response = json_decode($row['response_json'], true);
+
+    foreach ($analytics as $label => $options) {
+        if (isset($response[$label])) {
+            $analytics[$label][$response[$label]]++;
         }
     }
 }
 ?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Form Analytics</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
 
 <h2>Analytics</h2>
+<p><b>Total Submissions:</b> <?= $totalSubmissions ?></p>
 
-<?php foreach ($counts as $index => $data): ?>
-<h4><?= $fields[$index]['label'] ?></h4>
-<ul>
-<?php
-$max = max($data);
-$top = array_search($max, $data);
-foreach ($data as $opt => $count):
-?>
-<li><?= $opt ?> – <?= $count ?></li>
+<?php foreach ($analytics as $label => $options): ?>
+    <h3><?= htmlspecialchars($label) ?></h3>
+    <ul>
+        <?php
+        arsort($options);
+        $mostSelected = array_key_first($options);
+        ?>
+        <?php foreach ($options as $opt => $count): ?>
+            <li><?= $opt ?> – <?= $count ?></li>
+        <?php endforeach; ?>
+    </ul>
+    <p><b>Most selected:</b> <?= $mostSelected ?></p>
 <?php endforeach; ?>
-</ul>
-<b>Most selected:</b> <?= $top ?>
-<?php endforeach; ?>
+
+</body>
+</html>
