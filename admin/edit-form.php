@@ -1,4 +1,13 @@
 <?php
+session_start();
+if (!isset($_SESSION['admin'])) {
+    header("Location: login.php");
+    exit;
+}
+?>
+
+
+<?php
 require "../config/db.php";
 $id = (int)$_GET['id'];
 

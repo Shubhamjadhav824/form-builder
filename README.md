@@ -1,46 +1,27 @@
-# Form Builder Lite (Dynamic Form System)
+# Form Builder Lite – Dynamic Form System
 
-A simplified Google Forms–like application where admins can create dynamic forms and users can submit responses.  
-Built using **Core PHP, MySQL, and Vanilla JavaScript**.
+## Overview
+Form Builder Lite is a simplified Google Forms–like system where an admin can create dynamic forms and users can submit responses. All form structures and submissions are stored dynamically in MySQL using JSON.
 
----
+## Features
+- Dynamic form creation (Admin panel)
+- Multiple field types (Text, Number, Dropdown, Checkbox)
+- Required field validation
+- Public form submission via shareable URL
+- Admin dashboard to view submissions
+- JSON-based form and response storage
 
-## 🚀 Features Implemented
-
-### Admin Panel
-- Create dynamic forms
-- Add, edit, delete fields
-- Supported field types:
-  - Text
-  - Number
-  - Dropdown
-  - Checkbox
-- Required / Optional fields
-- View all forms
-- View submissions per form
-- Basic analytics for dropdown & checkbox fields
-
-### Public Form
-- Dynamic form rendering from database
-- Public shareable form link
-- Client-side and server-side validation
-- Secure submission handling
-
-### Analytics
-- Total submissions per form
-- Option-wise count
-- Most selected option
-
----
-
-## 🛠 Tech Stack
-
-- Backend: PHP (Core PHP, no framework)
-- Frontend: HTML, CSS, JavaScript (Vanilla JS)
+## Tech Stack
+- Backend: Core PHP
+- Frontend: HTML, CSS, Vanilla JavaScript
 - Database: MySQL
 - Version Control: Git & GitHub
 
----
+## Database Setup
+1. Create a MySQL database
+2. Import `database.sql`
+3. Update credentials in `configuration/db.php`
 
-## 🗂 Project Structure
-
+## Running Locally
+```bash
+docker compose up --build

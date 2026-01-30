@@ -1,10 +1,18 @@
 <?php
-require "../config/db.php";
+session_start();
+if (!isset($_SESSION['admin'])) {
+    header("Location: login.php");
+    exit;
+}
+?>
+
+<?php
+require_once "../configuration/db.php";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $title = $_POST['title'];
     $description = $_POST['description'];
-    $structure = $_POST['structure'];
+    $structure = json_encode($_POST['fields']);
 
     $stmt = $conn->prepare(
         "INSERT INTO forms (title, description, structure_json) VALUES (?, ?, ?)"
@@ -16,30 +24,72 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     exit;
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" href="../assets/css/style.css">
+    <title>Create Form</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .field { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    </style>
 </head>
 <body>
 
-<div class="container">
-<h2>Create Form</h2>
+<h2>Create New Form</h2>
 
 <form method="POST">
-  <input type="text" name="title" placeholder="Form Title" required>
-  <textarea name="description" placeholder="Description"></textarea>
+    <label>Form Title</label><br>
+    <input type="text" name="title" required><br><br>
 
-  <h3>Fields</h3>
-  <div id="fields"></div>
+    <label>Description</label><br>
+    <textarea name="description"></textarea><br><br>
 
-  <input type="hidden" name="structure" id="structure">
+    <h3>Fields</h3>
+    <div id="fields"></div>
 
-  <button type="button" onclick="addField()">Add Field</button>
-  <button type="submit">Save Form</button>
+    <button type="button" onclick="addField()">Add Field</button><br><br>
+    <button type="submit">Save Form</button>
 </form>
-</div>
 
-<script src="../assets/js/form-builder.js"></script>
+<script>
+let fieldIndex = 0;
+
+function addField() {
+    const div = document.createElement("div");
+    div.className = "field";
+
+    div.innerHTML = `
+        <label>Label</label>
+        <input type="text" name="fields[${fieldIndex}][label]" required>
+
+        <label>Type</label>
+        <select name="fields[${fieldIndex}][type]" onchange="toggleOptions(this, ${fieldIndex})">
+            <option value="text">Text</option>
+            <option value="number">Number</option>
+            <option value="dropdown">Dropdown</option>
+            <option value="checkbox">Checkbox</option>
+        </select>
+
+        <label>Required</label>
+        <input type="checkbox" name="fields[${fieldIndex}][required]" value="1">
+
+        <div id="options-${fieldIndex}" style="display:none">
+            <label>Options (comma separated)</label>
+            <input type="text" name="fields[${fieldIndex}][options]">
+        </div>
+    `;
+    document.getElementById("fields").appendChild(div);
+    fieldIndex++;
+}
+
+function toggleOptions(select, index) {
+    const optionsDiv = document.getElementById(`options-${index}`);
+    optionsDiv.style.display =
+        (select.value === "dropdown" || select.value === "checkbox")
+        ? "block" : "none";
+}
+</script>
+
 </body>
 </html>

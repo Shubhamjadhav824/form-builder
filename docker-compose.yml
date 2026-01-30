@@ -1,38 +1,41 @@
-version: "3.8"
-
 services:
-  php:
-    build: .
+  php_app:
+    image: php:8.2-apache
     container_name: php_app
     ports:
       - "8000:80"
     volumes:
-      - .:/var/www/html
+      - ./:/var/www/html
     depends_on:
-      - mysql
+      - mysql_db
+    restart: always
 
-  mysql:
+  mysql_db:
     image: mysql:8.0
     container_name: mysql_db
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: form_builder
+      MYSQL_USER: form_user
+      MYSQL_PASSWORD: form_pass
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    restart: always
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
-    restart: always
     ports:
       - "8080:80"
     environment:
-      PMA_HOST: mysql
+      PMA_HOST: mysql_db
+      PMA_USER: root
+      PMA_PASSWORD: root
     depends_on:
-      - mysql
+      - mysql_db
+    restart: always
 
 volumes:
   mysql_data:
